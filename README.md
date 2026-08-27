@@ -51,7 +51,8 @@ Before you begin, make sure you have:
 > ```
 > python3 --version
 > ```  
-> If you see something like `Python 3.11.4`, you're good. If you get an error, install Python from the link above.
+> - ✅ If you see `Python 3.11.4` (or similar) → you're good  
+> - ❌ If you get an error like "command not found" → install Python from the link above
 
 ---
 
@@ -90,8 +91,10 @@ cd pruszkow-news-pipeline
 - A black window will appear — this is normal
 
 #### Step 3: Follow the on-screen instructions
-The script will:
-1. Check if Python is installed ✓
+The script will automatically:
+1. **Check if Python is installed**
+   - ✅ If yes → continues to next step
+   - ❌ If no → shows error message and stops. You must [install Python](https://www.python.org/downloads/) first, then run `start.bat` again
 2. Create a settings file (`.env`) ✓
 3. Ask you to choose an AI provider (type `1` for Gemini — it's free) ✓
 4. Ask for your API key (paste it in) ✓
@@ -128,8 +131,10 @@ chmod +x start.sh
 ```
 
 #### Step 5: Follow the on-screen instructions
-The script will:
-1. Check if Python 3 is installed ✓
+The script will automatically:
+1. **Check if Python 3 is installed**
+   - ✅ If yes → continues to next step
+   - ❌ If no → shows error message and stops. You must [install Python](https://www.python.org/downloads/) first, then run `./start.sh` again
 2. Create a settings file (`.env`) ✓
 3. Ask you to choose an AI provider (type `1` for Gemini — it's free) ✓
 4. Ask for your API key (paste it in) ✓
@@ -165,8 +170,10 @@ chmod +x start.sh
 ```
 
 #### Step 5: Follow the on-screen instructions
-The script will:
-1. Check if Python 3 is installed ✓
+The script will automatically:
+1. **Check if Python 3 is installed**
+   - ✅ If yes → continues to next step
+   - ❌ If no → shows error message and stops. You must [install Python](https://www.python.org/downloads/) first, then run `./start.sh` again
 2. Create a settings file (`.env`) ✓
 3. Ask you to choose an AI provider (type `1` for Gemini — it's free) ✓
 4. Ask for your API key (paste it in) ✓
@@ -186,7 +193,7 @@ The script will:
 
 | Step | What Happens |
 |------|--------------|
-| 1 | Checks if Python 3 is installed |
+| 1 | **Checks if Python 3 is installed** — if not, shows error and stops |
 | 2 | Creates `.env` file from `.env.example` if it doesn't exist |
 | 3 | Asks you to choose an AI provider (Gemini, Claude, or OpenAI) |
 | 4 | Asks for your API key and saves it |
@@ -298,9 +305,20 @@ pruszkow-news-pipeline/
 
 ## Troubleshooting
 
-### "Python not found" error
-- Install Python from [python.org](https://www.python.org/downloads/)
-- **Important:** During installation, check the box that says "Add Python to PATH"
+### "Python not found" or "python3 not found" error
+
+This means Python is not installed on your computer.
+
+**What you'll see:**
+- Windows: `[ERROR] Python not found. Install Python 3.10+ first.` (then the window closes)
+- Mac/Linux: `[ERROR] python3 not found. Install Python 3.10+ first.`
+
+**How to fix:**
+1. Go to [python.org/downloads](https://www.python.org/downloads/)
+2. Download Python 3.10 or newer
+3. Run the installer
+4. **IMPORTANT (Windows only):** During installation, check the box that says **"Add Python to PATH"** — this is near the bottom of the first installer screen
+5. After installation, run the starter script again (`start.bat` or `./start.sh`)
 
 ### "Port already in use" error
 - Another program is using port 8000
