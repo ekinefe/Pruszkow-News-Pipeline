@@ -1,0 +1,45 @@
+# Secrets - NEVER commit these
+client_secret_*.json
+token.json
+.env
+
+# Runtime data (user-generated, not for sharing)
+data/attachments/
+data/articles/*.txt
+data/database.json
+data/database.csv
+data/ignored_senders.json
+data/system_rules.json
+data/article_settings.json
+data/quota.json
+data/usage.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
