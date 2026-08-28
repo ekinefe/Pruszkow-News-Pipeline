@@ -1,18 +1,12 @@
 # Secrets - NEVER commit these
-client_secret_*.json
+client_secret*.json
 token.json
 .env
 
 # Runtime data (user-generated, not for sharing)
-data/attachments/
-data/articles/*.txt
-data/database.json
-data/database.csv
-data/ignored_senders.json
-data/system_rules.json
-data/article_settings.json
-data/quota.json
-data/usage.json
+# The entire data/ dir is created by the starter script on first run,
+# so nothing inside it should ever be committed.
+data/
 
 # Python
 __pycache__/
