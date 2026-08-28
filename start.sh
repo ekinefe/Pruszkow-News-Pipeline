@@ -82,29 +82,39 @@ if [ "$needs_setup" = true ]; then
         3) PROVIDER="openai" ;;
         *) PROVIDER="gemini" ;;
     esac
-
+    echo "Press ENTER to skip and add your API key later in the Settings (UI)."
     echo ""
     case $PROVIDER in
         gemini)
             echo "Get your key at: https://aistudio.google.com/apikey"
             read -p "Gemini API Key: " API_KEY
-            sed_inplace "s/^GEMINI_API_KEY=.*/GEMINI_API_KEY=$API_KEY/" .env
+            if [ -n "$API_KEY" ]; then
+                sed_inplace "s/^GEMINI_API_KEY=.*/GEMINI_API_KEY=$API_KEY/" .env
+            fi
             ;;
         claude)
             echo "Get your key at: https://console.anthropic.com/"
             read -p "Claude API Key: " API_KEY
-            sed_inplace "s/^CLAUDE_API_KEY=.*/CLAUDE_API_KEY=$API_KEY/" .env
+            if [ -n "$API_KEY" ]; then
+                sed_inplace "s/^CLAUDE_API_KEY=.*/CLAUDE_API_KEY=$API_KEY/" .env
+            fi
             ;;
         openai)
             echo "Get your key at: https://platform.openai.com/api-keys"
             read -p "OpenAI API Key: " API_KEY
-            sed_inplace "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=$API_KEY/" .env
+            if [ -n "$API_KEY" ]; then
+                sed_inplace "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=$API_KEY/" .env
+            fi
             ;;
     esac
 
     sed_inplace "s/^AI_PROVIDER=.*/AI_PROVIDER=$PROVIDER/" .env
     source_env
-    echo "[OK] API key configured for $PROVIDER"
+    if [ -n "$API_KEY" ]; then
+        echo "[OK] API key configured for $PROVIDER"
+    else
+        echo "[OK] Provider set to $PROVIDER. API key skipped - add it in the Settings page (UI)."
+    fi
 else
     echo "[OK] API keys found (provider: $AI_PROVIDER)"
 fi

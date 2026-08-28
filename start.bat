@@ -66,6 +66,8 @@ if %NEEDS_SETUP%==1 (
     echo   2) Anthropic Claude
     echo   3) OpenAI
     echo.
+    echo Press ENTER to skip and add your API key later in the Settings ^(UI^).
+    echo.
     set /p PROVIDER_CHOICE="Choice [1]: "
     if "%PROVIDER_CHOICE%"=="" set PROVIDER_CHOICE=1
 
@@ -74,23 +76,33 @@ if %NEEDS_SETUP%==1 (
         echo.
         echo Get your key at: https://aistudio.google.com/apikey
         set /p API_KEY="Gemini API Key: "
-        powershell -Command "(Get-Content .env) -replace '^GEMINI_API_KEY=.*', 'GEMINI_API_KEY=%API_KEY%' | Set-Content .env"
+        if not "%API_KEY%"=="" (
+            powershell -Command "(Get-Content .env) -replace '^GEMINI_API_KEY=.*', 'GEMINI_API_KEY=%API_KEY%' | Set-Content .env"
+        )
     ) else if "%PROVIDER_CHOICE%"=="2" (
         set PROVIDER=claude
         echo.
         echo Get your key at: https://console.anthropic.com/
         set /p API_KEY="Claude API Key: "
-        powershell -Command "(Get-Content .env) -replace '^CLAUDE_API_KEY=.*', 'CLAUDE_API_KEY=%API_KEY%' | Set-Content .env"
+        if not "%API_KEY%"=="" (
+            powershell -Command "(Get-Content .env) -replace '^CLAUDE_API_KEY=.*', 'CLAUDE_API_KEY=%API_KEY%' | Set-Content .env"
+        )
     ) else (
         set PROVIDER=openai
         echo.
         echo Get your key at: https://platform.openai.com/api-keys
         set /p API_KEY="OpenAI API Key: "
-        powershell -Command "(Get-Content .env) -replace '^OPENAI_API_KEY=.*', 'OPENAI_API_KEY=%API_KEY%' | Set-Content .env"
+        if not "%API_KEY%"=="" (
+            powershell -Command "(Get-Content .env) -replace '^OPENAI_API_KEY=.*', 'OPENAI_API_KEY=%API_KEY%' | Set-Content .env"
+        )
     )
 
     powershell -Command "(Get-Content .env) -replace '^AI_PROVIDER=.*', 'AI_PROVIDER=%PROVIDER%' | Set-Content .env"
-    echo [OK] API key configured for %PROVIDER%
+    if not "%API_KEY%"=="" (
+        echo [OK] API key configured for %PROVIDER%
+    ) else (
+        echo [OK] Provider set to %PROVIDER%. API key skipped - add it in the Settings page ^(UI^).
+    )
 ) else (
     echo [OK] API keys found
 )
