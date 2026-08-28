@@ -28,6 +28,8 @@ jobs:
       # macos-latest]) as phase two if you want Python-less installs.
 
       # ---- Assemble platform source bundles ----
+      # NOTE: the installer/ folder (unused web wizard) is intentionally
+      # NOT copied here, so it is never shipped in a release.
       - name: Prepare source bundle (Windows)
         run: |
           mkdir -p data dist/windows/pruszkow-news-pipeline

@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<!--
+  NOTE: This web installer is currently UNUSED / DISABLED.
+  It is not linked from the app and is NOT included in the GitHub Release
+  bundles (see .github/workflows/release.yml). Kept for reference only.
+  The download flow for end users is: GitHub Release -> extract ->
+  run start.sh / start.bat.
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -47,6 +54,11 @@ button.back{background:#fff}
 .dl-card .meta strong{display:block;font-size:14px}
 .dl-card .meta span{color:var(--muted)}
 .note{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+.step-block{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;font-size:14px;line-height:1.6}
+.step-block .step-num{flex:0 0 28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-top:1px}
+.step-block .code{background:#0f172a;color:#d1fae5;border-radius:8px;padding:10px 12px;font-family:monospace;
+  font-size:13px;margin-top:8px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);
   border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -115,16 +127,9 @@ button.back{background:#fff}
 
   <!-- STEP 4: Run -->
   <div class="card hidden" id="step-3">
-    <h2>Launch the app</h2>
-    <p class="desc">After installation, start the app and open it in your browser.</p>
-    <div class="form-group">
-      <label>How to run</label>
-      <input type="text" id="run-cmd" readonly>
-    </div>
-    <div class="form-group">
-      <label>App address</label>
-      <input type="text" value="http://localhost:8000" readonly>
-    </div>
+    <h2 id="run-title">Launch the app</h2>
+    <p class="desc">Now start the app on your computer. Your exact steps are shown below.</p>
+    <div id="run-instructions"></div>
     <div class="btn-row">
       <button class="back" onclick="prev()">Back</button>
       <button class="primary" onclick="next()">Next</button>
@@ -164,11 +169,6 @@ const INSTALL_CMD = {
   linux: "curl -fsSL https://github.com/" + REPO + "/releases/latest/download/pruszkow-news-pipeline-linux.tar.gz | tar xz && ./pruszkow-news-pipeline/start.sh",
   windows: "",
 };
-const RUN_CMD = {
-  windows: "Extract the ZIP, then double-click start.bat",
-  macos: "cd pruszkow-news-pipeline && ./start.sh",
-  linux: "cd pruszkow-news-pipeline && ./start.sh",
-};
 
 let step = 0;
 const STEPS = ["step-0","step-1","step-2","step-3","step-4"];
@@ -177,6 +177,7 @@ const total = STEPS.length;
 document.getElementById("os-select").addEventListener("change", (e) => {
   os = e.target.value || "unknown";
   buildDownloads();
+  buildRunInstructions();
 });
 
 function render() {
@@ -186,8 +187,32 @@ function render() {
   buildDownloads();
   const cmd = INSTALL_CMD[os] || "";
   document.getElementById("install-cmd").value = cmd;
-  document.getElementById("run-cmd").value = RUN_CMD[os] || RUN_CMD.linux;
   document.getElementById("os-pill").textContent = os;
+  buildRunInstructions();
+}
+
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+function buildRunInstructions() {
+  const host = document.getElementById("run-instructions");
+  if (!host) return;
+  const title = document.getElementById("run-title");
+  if (os === "windows") {
+    title.textContent = "Launch on Windows";
+    host.innerHTML =
+      '<div class="step-block"><div class="step-num">1</div><div>Open the downloaded <strong>pruszkow-news-pipeline-windows.zip</strong> and extract it to a folder.</div></div>' +
+      '<div class="step-block"><div class="step-num">2</div><div>Open that folder and double-click <strong>start.bat</strong>.</div></div>' +
+      '<div class="step-block"><div class="step-num">3</div><div>A black window opens and sets everything up. Then your browser opens at <strong>http://localhost:8000</strong>.</div></div>';
+  } else {
+    title.textContent = "Launch on " + (os === "macos" ? "macOS" : "Linux");
+    const extractCmd = os === "macos"
+      ? 'tar -xzf pruszkow-news-pipeline-macos.tar.gz'
+      : 'tar -xzf pruszkow-news-pipeline-linux.tar.gz';
+    host.innerHTML =
+      '<div class="step-block"><div class="step-num">1</div><div>Open Terminal and go to your Downloads folder, then extract:<div class="code">' + esc("cd ~/Downloads && " + extractCmd) + '</div></div></div>' +
+      '<div class="step-block"><div class="step-num">2</div><div>Run the setup (first time only):<div class="code">' + esc("cd pruszkow-news-pipeline && chmod +x start.sh && ./start.sh") + '</div></div></div>' +
+      '<div class="step-block"><div class="step-num">3</div><div>Your browser opens at <strong>http://localhost:8000</strong>.</div></div>';
+  }
 }
 
 function next(){ if(step < total-1){ step++; render(); } }
