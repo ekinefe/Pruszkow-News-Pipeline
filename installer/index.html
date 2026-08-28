@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pruszkow News Pipeline - Installer</title>
+<style>
+:root{
+  --brand:#0f766e; --brand-dark:#115e59; --bg:#f1f5f9; --card:#ffffff;
+  --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --success:#16a34a;
+  --danger:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.wizard{max-width:640px;margin:auto;padding:24px;width:100%}
+header{text-align:center;margin-bottom:24px}
+header h1{font-size:22px;color:var(--brand)}
+header p{color:var(--muted);margin-top:4px}
+.stepper{display:flex;gap:4px;margin-bottom:28px}
+.step{flex:1;height:6px;border-radius:999px;background:var(--border)}
+.step.active{background:var(--brand)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h2{font-size:18px;margin-bottom:8px}
+.card .desc{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid var(--border);
+  border-radius:8px;font-size:14px}
+.btn-row{display:flex;justify-content:space-between;gap:12px;margin-top:24px}
+button{padding:10px 20px;border-radius:8px;border:1px solid var(--border);font-size:14px;
+  font-weight:600;cursor:pointer;background:#fff;color:var(--text);transition:background .15s}
+button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+button.primary:hover{background:var(--brand-dark)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.back{background:#fff}
+.status{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-wrap}
+.status.error{color:var(--danger)}
+.status.ok{color:var(--success)}
+.os-pill{display:inline-block;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;
+  background:#ecfeff;color:#0e7490;text-transform:capitalize}
+.hidden{display:none}
+.dl-card{border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;
+  align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.dl-card .meta{font-size:13px}
+.dl-card .meta strong{display:block;font-size:14px}
+.dl-card .meta span{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);
+  border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wizard">
+  <header>
+    <h1>Pruszkow News Pipeline</h1>
+    <p>Download and install the pipeline for your device</p>
+  </header>
+
+  <div class="stepper" id="stepper">
+    <div class="step" data-step="0"></div>
+    <div class="step" data-step="1"></div>
+    <div class="step" data-step="2"></div>
+    <div class="step" data-step="3"></div>
+    <div class="step" data-step="4"></div>
+  </div>
+
+  <!-- STEP 1: Welcome / OS -->
+  <div class="card" id="step-0">
+    <h2>Welcome</h2>
+    <p class="desc">This wizard downloads and installs the Pruszkow News Pipeline on your device. It will guide you through every step.</p>
+    <div class="form-group">
+      <label>Your operating system</label>
+      <select id="os-select">
+        <option value="windows">Windows</option>
+        <option value="macos">macOS</option>
+        <option value="linux">Linux</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <span></span>
+      <button class="primary" onclick="next()">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Download -->
+  <div class="card hidden" id="step-1">
+    <h2>Download</h2>
+    <p class="desc">Choose a download for your platform. We detected <span class="os-pill" id="os-pill"></span>.</p>
+    <div id="downloads"></div>
+    <div class="status" id="dl-status"></div>
+    <p class="note">Note: this bundle requires Python 3.10 or newer installed on your device. The setup script will install everything else automatically.</p>
+    <p class="note">Tip: If you prefer not to download, you can install directly with a single command from the Terminal (macOS/Linux) shown on the next screen.</p>
+    <div class="btn-row">
+      <button class="back" onclick="prev()">Back</button>
+      <button class="primary" onclick="next()">I've downloaded / Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Alternative install command -->
+  <div class="card hidden" id="step-2">
+    <h2>Install command (macOS / Linux)</h2>
+    <p class="desc">Prefer the Terminal? Copy and run this command. It does the same as the downloaded file.</p>
+    <div class="form-group">
+      <textarea id="install-cmd" rows="3" readonly style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:13px;background:#f8fafc"></textarea>
+    </div>
+    <p class="desc">Windows users: extract the downloaded ZIP, then double-click <strong>start.bat</strong>.</p>
+    <div class="btn-row">
+      <button class="back" onclick="prev()">Back</button>
+      <button class="primary" onclick="next()">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Run -->
+  <div class="card hidden" id="step-3">
+    <h2>Launch the app</h2>
+    <p class="desc">After installation, start the app and open it in your browser.</p>
+    <div class="form-group">
+      <label>How to run</label>
+      <input type="text" id="run-cmd" readonly>
+    </div>
+    <div class="form-group">
+      <label>App address</label>
+      <input type="text" value="http://localhost:8000" readonly>
+    </div>
+    <div class="btn-row">
+      <button class="back" onclick="prev()">Back</button>
+      <button class="primary" onclick="next()">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Done -->
+  <div class="card hidden" id="step-4">
+    <h2>You're all set</h2>
+    <p class="desc">The pipeline is ready. If you have any issues, check the README Troubleshooting section.</p>
+    <div class="status ok">Installation complete.</div>
+    <div class="btn-row">
+      <button class="back" onclick="prev()">Back</button>
+      <span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Platform detection ----
+const ua = navigator.userAgent.toLowerCase();
+let os = "unknown";
+if (ua.includes("win")) os = "windows";
+else if (ua.includes("mac") || ua.includes("darwin")) os = "macos";
+else if (ua.includes("linux") || ua.includes("x11")) os = "linux";
+
+// ---- GitHub release metadata ----
+// The release naming follows the CI workflow in .github/workflows/release.yml
+const REPO = "ekinefe/Pruszkow-News-Pipeline";
+const ASSETS = {
+  windows: { name: "pruszkow-news-pipeline-windows.zip",     label: "Windows installer (ZIP)" },
+  macos:   { name: "pruszkow-news-pipeline-macos.tar.gz",    label: "macOS app bundle (TAR.GZ)" },
+  linux:   { name: "pruszkow-news-pipeline-linux.tar.gz",    label: "Linux app bundle (TAR.GZ)" },
+};
+const INSTALL_CMD = {
+  macos: "curl -fsSL https://github.com/" + REPO + "/releases/latest/download/pruszkow-news-pipeline-macos.tar.gz | tar xz && ./pruszkow-news-pipeline/start.sh",
+  linux: "curl -fsSL https://github.com/" + REPO + "/releases/latest/download/pruszkow-news-pipeline-linux.tar.gz | tar xz && ./pruszkow-news-pipeline/start.sh",
+  windows: "",
+};
+const RUN_CMD = {
+  windows: "Extract the ZIP, then double-click start.bat",
+  macos: "cd pruszkow-news-pipeline && ./start.sh",
+  linux: "cd pruszkow-news-pipeline && ./start.sh",
+};
+
+let step = 0;
+const STEPS = ["step-0","step-1","step-2","step-3","step-4"];
+const total = STEPS.length;
+
+document.getElementById("os-select").addEventListener("change", (e) => {
+  os = e.target.value || "unknown";
+  buildDownloads();
+});
+
+function render() {
+  STEPS.forEach((id, i) => document.getElementById(id).classList.toggle("hidden", i !== step));
+  document.querySelectorAll(".step").forEach((s, i) => s.classList.toggle("active", i <= step));
+  document.getElementById("os-select").value = os;
+  buildDownloads();
+  const cmd = INSTALL_CMD[os] || "";
+  document.getElementById("install-cmd").value = cmd;
+  document.getElementById("run-cmd").value = RUN_CMD[os] || RUN_CMD.linux;
+  document.getElementById("os-pill").textContent = os;
+}
+
+function next(){ if(step < total-1){ step++; render(); } }
+function prev(){ if(step > 0){ step--; render(); } }
+
+function buildDownloads() {
+  const host = document.getElementById("downloads");
+  if (!host) return;
+  host.innerHTML = "";
+  const a = ASSETS[os];
+  if (!a) {
+    host.innerHTML = '<p class="status error">We could not auto-detect a download for your OS. Use the Release page.</p>';
+    return;
+  }
+  const url = "https://github.com/" + REPO + "/releases/latest/download/" + a.name;
+  const el = document.createElement("div");
+  el.className = "dl-card";
+  el.innerHTML =
+    '<div class="meta"><strong>Latest release</strong><span>' + a.label + '</span></div>' +
+    '<button class="primary" onclick="triggerDownload(\'' + url + '\')">Download</button>';
+  host.appendChild(el);
+}
+
+function triggerDownload(url) {
+  const status = document.getElementById("dl-status");
+  status.className = "status";
+  status.innerHTML = '<span class="spinner"></span>Downloading latest release...';
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "";
+  a.click();
+  setTimeout(() => { status.className = "status ok"; status.textContent = "Download should start. If not, click the Download button above or use the Release page."; }, 1200);
+}
+
+render();
+</script>
+</body>
+</html>

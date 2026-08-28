@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # NOTE on "bundling Python":
+      # These source bundles still require the user to have Python 3.10+,
+      # matching the README. Producing a true standalone executable (no
+      # Python needed) is NOT done here because:
+      #   1. PyInstaller cannot cross-compile - each OS needs its own runner
+      #      (ubuntu + windows + macos), and
+      #   2. the app resolves .env/data/ paths from the source tree, so it
+      #      must be refactored to resolve paths under a frozen executable.
+      # Add per-OS build jobs (matrix: [ubuntu-latest, windows-latest,
+      # macos-latest]) as phase two if you want Python-less installs.
+
+      # ---- Assemble platform source bundles ----
+      - name: Prepare source bundle (Windows)
+        run: |
+          mkdir -p data dist/windows/pruszkow-news-pipeline
+          cp -r backend frontend data requirements.txt .env.example README.md \
+            start.bat .gitignore dist/windows/pruszkow-news-pipeline/
+          (cd dist/windows && zip -r ../pruszkow-news-pipeline-windows.zip pruszkow-news-pipeline)
+
+      - name: Prepare source bundle (macOS/Linux)
+        run: |
+          mkdir -p data dist/macos/pruszkow-news-pipeline dist/linux/pruszkow-news-pipeline
+          cp -r backend frontend data requirements.txt .env.example README.md \
+            start.sh .gitignore dist/macos/pruszkow-news-pipeline/
+          cp -r backend frontend data requirements.txt .env.example README.md \
+            start.sh .gitignore dist/linux/pruszkow-news-pipeline/
+          (cd dist/macos && tar -czf ../pruszkow-news-pipeline-macos.tar.gz pruszkow-news-pipeline)
+          (cd dist && tar -czf pruszkow-news-pipeline-linux.tar.gz -C linux pruszkow-news-pipeline)
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/pruszkow-news-pipeline-windows.zip
+            dist/pruszkow-news-pipeline-macos.tar.gz
+            dist/pruszkow-news-pipeline-linux.tar.gz
+          generate_release_notes: true
