@@ -8,7 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from backend.config import settings
+from backend.config import settings, BASE_DIR
 from backend.services.database import database_service
 
 
@@ -18,12 +18,15 @@ class GmailService:
         self._creds = None
 
     def _token_path(self) -> Path:
-        return Path(settings.token_file)
+        p = Path(settings.token_file)
+        if not p.is_absolute():
+            p = BASE_DIR / p
+        return p
 
     def _credentials_path(self) -> Path:
         p = Path(settings.gmail_credentials_file)
         if not p.is_absolute():
-            p = Path(__file__).resolve().parent.parent / p
+            p = BASE_DIR / p
         return p
 
     def is_authenticated(self) -> bool:
