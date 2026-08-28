@@ -297,6 +297,8 @@ pruszkow-news-pipeline/
 ├── data/                       # Generated data (created on first run)
 ├── requirements.txt            # Python packages needed
 ├── .env.example               # Settings template
+├── .github/workflows/release.yml  # Builds & attaches release bundles
+├── installer/                  # (unused) web download wizard - kept for reference
 ├── start.sh                   # Mac/Linux starter script
 └── start.bat                  # Windows starter script
 ```
