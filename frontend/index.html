@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruszkow News Pipeline</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>Pruszkow<br><small>News Pipeline</small></h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link active" data-page="pipeline">Pipeline</a></li>
+                <li><a href="#" class="nav-link" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-link" data-page="settings">Settings</a></li>
+                <li><a href="#" class="nav-link" data-page="getting-started">First time here?</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="auth-dot" id="sidebar-auth-dot"></div>
+                <span id="sidebar-auth-text">Checking...</span>
+            </div>
+        </nav>
+
+        <main class="content">
+            <div class="content-pages">
+
+                <!-- PIPELINE PAGE -->
+                <div id="page-pipeline" class="page active">
+                    <div class="pipeline-main">
+
+                        <!-- STEP 1: FETCH -->
+                        <div class="step" id="step-fetch">
+                            <div class="step-header">
+                                <div class="step-number">1</div>
+                                <h2>Fetch Emails</h2>
+                            </div>
+                            <div class="step-body">
+                                <div class="fetch-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="fetch-count">Max emails</label>
+                                            <input type="number" id="fetch-count" value="10" min="1" max="100">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="fetch-query">Filter</label>
+                                            <select id="fetch-query">
+                                                <option value="">All emails</option>
+                                                <option value="is:unread">Unread only</option>
+                                                <option value="is:read">Read only</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="fetch-mark-read"> Mark as read
+                                            </label>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="fetch-add-label"> Add "listed" label
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" id="btn-fetch">Fetch Emails</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: SELECT -->
+                        <div class="step disabled" id="step-select">
+                            <div class="step-header">
+                                <div class="step-number">2</div>
+                                <h2>Select Emails</h2>
+                                <span class="step-badge" id="selected-count">0 selected</span>
+                            </div>
+                            <div class="step-body">
+                                <div class="select-controls">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="select-all"> Select All
+                                    </label>
+                                    <div class="generate-controls">
+                                        <div class="mode-toggle">
+                                            <label class="radio-label">
+                                                <input type="radio" name="gen-mode" value="batch" checked>
+                                                <span>All in one</span>
+                                            </label>
+                                            <label class="radio-label">
+                                                <input type="radio" name="gen-mode" value="single">
+                                                <span>One by one</span>
+                                            </label>
+                                            <button class="btn-info-icon" id="btn-mode-info" title="What's the difference?">&#9432;</button>
+                                        </div>
+                                        <button class="btn btn-primary" id="btn-generate" disabled>Generate Articles</button>
+                                    </div>
+                                </div>
+                                <div id="email-list" class="email-list"></div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: REVIEW -->
+                        <div class="step disabled" id="step-review">
+                            <div class="step-header">
+                                <div class="step-number">3</div>
+                                <h2>Review Articles</h2>
+                                <span class="step-badge" id="review-count">0 articles</span>
+                            </div>
+                            <div class="step-body">
+                                <div class="review-controls">
+                                    <div class="view-toggle">
+                                        <button class="btn btn-small btn-secondary active" data-view="cards">Cards</button>
+                                        <button class="btn btn-small btn-secondary" data-view="json">JSON</button>
+                                    </div>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="review-select-all" checked> Select All
+                                    </label>
+                                    <button class="btn btn-primary" id="btn-create-drafts" disabled>Create Drafts</button>
+                                </div>
+                                <div id="article-list" class="article-list"></div>
+                                <div id="article-json" class="article-json" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- DASHBOARD PAGE -->
+                <div id="page-dashboard" class="page">
+                    <div class="dashboard-grid">
+
+                        <!-- Summary Cards -->
+                        <div class="dash-row">
+                            <div class="dash-card">
+                                <div class="dash-card-label">Today</div>
+                                <div class="dash-card-value" id="dash-today-requests">0</div>
+                                <div class="dash-card-sub">requests</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">This Week</div>
+                                <div class="dash-card-value" id="dash-week-requests">0</div>
+                                <div class="dash-card-sub">requests</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">This Month</div>
+                                <div class="dash-card-value" id="dash-month-requests">0</div>
+                                <div class="dash-card-sub">requests</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">Total</div>
+                                <div class="dash-card-value" id="dash-total-requests">0</div>
+                                <div class="dash-card-sub">requests</div>
+                            </div>
+                        </div>
+
+                        <div class="dash-row">
+                            <div class="dash-card">
+                                <div class="dash-card-label">Today Tokens</div>
+                                <div class="dash-card-value" id="dash-today-tokens">0</div>
+                                <div class="dash-card-sub">tokens used</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">Week Tokens</div>
+                                <div class="dash-card-value" id="dash-week-tokens">0</div>
+                                <div class="dash-card-sub">tokens used</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">Month Tokens</div>
+                                <div class="dash-card-value" id="dash-month-tokens">0</div>
+                                <div class="dash-card-sub">tokens used</div>
+                            </div>
+                            <div class="dash-card">
+                                <div class="dash-card-label">Avg Latency</div>
+                                <div class="dash-card-value" id="dash-avg-latency">0</div>
+                                <div class="dash-card-sub">ms per request</div>
+                            </div>
+                        </div>
+
+                        <!-- Quota Bars -->
+                        <div class="dash-card dash-wide">
+                            <h3>Quota Usage</h3>
+                            <p class="text-muted">Set your API limits in Settings below. Bars show current usage against your limits.</p>
+                            <div class="quota-bars" id="quota-bars">
+                                <div class="quota-row">
+                                    <div class="quota-label">Daily Requests</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-daily-req-bar"></div></div>
+                                    <div class="quota-text" id="quota-daily-req-text">0 / unlimited</div>
+                                    <div class="quota-reset" id="quota-daily-reset"></div>
+                                </div>
+                                <div class="quota-row">
+                                    <div class="quota-label">Weekly Requests</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-weekly-req-bar"></div></div>
+                                    <div class="quota-text" id="quota-weekly-req-text">0 / unlimited</div>
+                                    <div class="quota-reset" id="quota-weekly-reset"></div>
+                                </div>
+                                <div class="quota-row">
+                                    <div class="quota-label">Monthly Requests</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-monthly-req-bar"></div></div>
+                                    <div class="quota-text" id="quota-monthly-req-text">0 / unlimited</div>
+                                    <div class="quota-reset" id="quota-monthly-reset"></div>
+                                </div>
+                                <div class="quota-row">
+                                    <div class="quota-label">Daily Tokens</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-daily-tok-bar"></div></div>
+                                    <div class="quota-text" id="quota-daily-tok-text">0 / unlimited</div>
+                                    <div class="quota-reset"></div>
+                                </div>
+                                <div class="quota-row">
+                                    <div class="quota-label">Weekly Tokens</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-weekly-tok-bar"></div></div>
+                                    <div class="quota-text" id="quota-weekly-tok-text">0 / unlimited</div>
+                                    <div class="quota-reset"></div>
+                                </div>
+                                <div class="quota-row">
+                                    <div class="quota-label">Monthly Tokens</div>
+                                    <div class="quota-bar-track"><div class="quota-bar-fill" id="quota-monthly-tok-bar"></div></div>
+                                    <div class="quota-text" id="quota-monthly-tok-text">0 / unlimited</div>
+                                    <div class="quota-reset"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Success / Fail -->
+                        <div class="dash-card">
+                            <h3>Requests by Status</h3>
+                            <div class="dash-status-row">
+                                <span class="dash-status-dot success"></span>
+                                <span>Successful</span>
+                                <strong id="dash-total-success">0</strong>
+                            </div>
+                            <div class="dash-status-row">
+                                <span class="dash-status-dot fail"></span>
+                                <span>Failed</span>
+                                <strong id="dash-total-fail">0</strong>
+                            </div>
+                        </div>
+
+                        <!-- By Provider -->
+                        <div class="dash-card">
+                            <h3>By Provider</h3>
+                            <div id="dash-by-provider" class="dash-provider-list"></div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="dash-card dash-wide">
+                            <h3>Recent Activity</h3>
+                            <div class="dash-table-wrap">
+                                <table class="dash-table" id="dash-recent-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Provider</th>
+                                            <th>Operation</th>
+                                            <th>Tokens</th>
+                                            <th>Latency</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dash-recent-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Quota Settings -->
+                        <div class="dash-card dash-wide">
+                            <h3>Quota Limits</h3>
+                            <p class="text-muted">Set to 0 for unlimited. These limits are for your reference only and do not block API calls.</p>
+                            <div class="quota-form">
+                                <div class="quota-form-group">
+                                    <label>Daily Requests</label>
+                                    <input type="number" id="quota-input-daily-requests" min="0" value="0">
+                                </div>
+                                <div class="quota-form-group">
+                                    <label>Weekly Requests</label>
+                                    <input type="number" id="quota-input-weekly-requests" min="0" value="0">
+                                </div>
+                                <div class="quota-form-group">
+                                    <label>Monthly Requests</label>
+                                    <input type="number" id="quota-input-monthly-requests" min="0" value="0">
+                                </div>
+                                <div class="quota-form-group">
+                                    <label>Daily Tokens</label>
+                                    <input type="number" id="quota-input-daily-tokens" min="0" value="0">
+                                </div>
+                                <div class="quota-form-group">
+                                    <label>Weekly Tokens</label>
+                                    <input type="number" id="quota-input-weekly-tokens" min="0" value="0">
+                                </div>
+                                <div class="quota-form-group">
+                                    <label>Monthly Tokens</label>
+                                    <input type="number" id="quota-input-monthly-tokens" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="quota-form-actions">
+                                <button class="btn btn-primary btn-small" id="btn-save-quota">Save Limits</button>
+                                <button class="btn btn-secondary btn-small" id="btn-reset-usage">Reset All Usage</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SETTINGS PAGE -->
+                <div id="page-settings" class="page">
+                    <div class="settings-grid">
+
+                        <!-- LEFT COLUMN -->
+                        <div class="settings-col">
+                            <div class="card">
+                                <h3>Gmail Connection</h3>
+                                <p class="text-muted">Connect your Gmail account to fetch emails and create drafts.</p>
+                                <div class="auth-status" id="auth-status-display"></div>
+                                <button class="btn btn-primary" id="btn-connect-gmail">Connect Gmail</button>
+                            </div>
+
+                            <div class="card">
+                                <h3>Google Credentials</h3>
+                                <p class="text-muted">Upload your OAuth2 credentials JSON file from Google Cloud Console.</p>
+                                <div class="credentials-status" id="credentials-status"></div>
+                                <div class="file-upload-area" id="credentials-upload-area">
+                                    <input type="file" id="credentials-file-input" accept=".json" style="display:none;">
+                                    <button class="btn btn-secondary" id="btn-upload-credentials">Choose JSON File</button>
+                                    <span class="file-upload-hint" id="credentials-file-name">No file selected</span>
+                                </div>
+                                <button class="btn btn-primary btn-small" id="btn-save-credentials" disabled>Upload & Save</button>
+                            </div>
+
+                            <div class="card">
+                                <h3>AI Provider</h3>
+                                <p class="text-muted">Select which AI service to use for article generation.</p>
+                                <div class="ai-provider-options" id="ai-provider-options">
+                                    <label class="ai-provider-option">
+                                        <input type="radio" name="ai-provider" value="gemini">
+                                        <div class="ai-provider-label">
+                                            <span class="ai-provider-name">Google Gemini</span>
+                                            <span class="ai-provider-status" id="gemini-status"></span>
+                                        </div>
+                                    </label>
+                                    <div class="ai-provider-key-row">
+                                        <input type="password" id="gemini-key-input" placeholder="Enter Gemini API key">
+                                        <button class="btn btn-small btn-secondary" data-provider="gemini" data-action="save-key">Save</button>
+                                        <button class="btn btn-small btn-secondary btn-test" data-provider="gemini" data-action="test-key">Test</button>
+                                    </div>
+                                    <div class="ai-provider-test-result" id="gemini-test-result"></div>
+
+                                    <label class="ai-provider-option">
+                                        <input type="radio" name="ai-provider" value="claude">
+                                        <div class="ai-provider-label">
+                                            <span class="ai-provider-name">Anthropic Claude</span>
+                                            <span class="ai-provider-status" id="claude-status"></span>
+                                        </div>
+                                    </label>
+                                    <div class="ai-provider-key-row">
+                                        <input type="password" id="claude-key-input" placeholder="Enter Claude API key">
+                                        <button class="btn btn-small btn-secondary" data-provider="claude" data-action="save-key">Save</button>
+                                        <button class="btn btn-small btn-secondary btn-test" data-provider="claude" data-action="test-key">Test</button>
+                                    </div>
+                                    <div class="ai-provider-test-result" id="claude-test-result"></div>
+
+                                    <label class="ai-provider-option">
+                                        <input type="radio" name="ai-provider" value="openai">
+                                        <div class="ai-provider-label">
+                                            <span class="ai-provider-name">OpenAI</span>
+                                            <span class="ai-provider-status" id="openai-status"></span>
+                                        </div>
+                                    </label>
+                                    <div class="ai-provider-key-row">
+                                        <input type="password" id="openai-key-input" placeholder="Enter OpenAI API key">
+                                        <button class="btn btn-small btn-secondary" data-provider="openai" data-action="save-key">Save</button>
+                                        <button class="btn btn-small btn-secondary btn-test" data-provider="openai" data-action="test-key">Test</button>
+                                    </div>
+                                    <div class="ai-provider-test-result" id="openai-test-result"></div>
+                                </div>
+                                <div class="ai-provider-footer">
+                                    <button class="btn btn-primary btn-small" id="btn-save-provider">Save Provider</button>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+
+                        <!-- RIGHT COLUMN -->
+                        <div class="settings-col">
+                            
+                            <div class="card">
+                                <h3>Ignored Senders</h3>
+                                <p class="text-muted">Emails from these senders will be hidden from the pipeline. Uses substring match (e.g. "linkedin.com" blocks all LinkedIn emails).</p>
+                                <div class="ignored-add-row">
+                                    <input type="text" id="ignored-sender-input" placeholder="e.g. noreply@linkedin.com">
+                                    <button class="btn btn-primary btn-small" id="btn-add-ignored">Add</button>
+                                </div>
+                                <div id="ignored-senders-list" class="ignored-senders-list"></div>
+                            </div>
+
+                            <div class="card">
+                                <h3>System Prompt</h3>
+                                <p class="text-muted">Instructions sent to the AI for every article. Controls tone, language, and rules.</p>
+                                <textarea id="system-rules-textarea" rows="14" class="system-rules-textarea"></textarea>
+                                <button class="btn btn-primary btn-small" id="btn-save-system-rules">Save Prompt</button>
+                            </div>
+
+                            <div class="card">
+                                <h3>Article Settings</h3>
+                                <p class="text-muted">Fine-tune how articles are generated. Word limits and language are injected into the AI prompt automatically.</p>
+                                <div class="article-settings-grid">
+                                    <div class="form-group">
+                                        <label for="art-min-words">Min words</label>
+                                        <input type="number" id="art-min-words" min="0" value="50">
+                                        <span class="form-hint">Shorter emails may produce fewer words</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="art-max-words">Max words</label>
+                                        <input type="number" id="art-max-words" min="1" value="200">
+                                        <span class="form-hint">Hard cap enforced by the AI prompt</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="art-language">Article language</label>
+                                        <select id="art-language">
+                                            <option value="polish">Polish</option>
+                                            <option value="english">English</option>
+                                            <option value="auto">Auto (based on email)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="art-default-mode">Default generation mode</label>
+                                        <select id="art-default-mode">
+                                            <option value="batch">All in one (batch)</option>
+                                            <option value="single">One by one</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-small" id="btn-save-article-settings">Save Settings</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- GETTING STARTED PAGE -->
+                <div id="page-getting-started" class="page">
+                    <div class="getting-started">
+
+                        <div class="gs-header">
+                            <div class="gs-header-top">
+                                <div>
+                                    <h1>First time here?</h1>
+                                    <p class="gs-subtitle">A complete guide to every feature in Pruszkow News Pipeline.</p>
+                                </div>
+                                <div class="gs-search">
+                                    <input type="text" id="gs-search-input" placeholder="Search features..." autocomplete="off">
+                                    <span class="gs-search-icon">&#128269;</span>
+                                    <span class="gs-search-clear" id="gs-search-clear">&times;</span>
+                                </div>
+                            </div>
+                            <div class="gs-search-results" id="gs-search-results"></div>
+                        </div>
+
+                        <div class="gs-body">
+                            <!-- TABLE OF CONTENTS -->
+                            <nav class="gs-toc" id="gs-toc">
+                                <div class="gs-toc-title">Contents</div>
+                                <a href="#gs-overview" class="gs-toc-link" data-section="gs-overview">What is this app?</a>
+                                <a href="#gs-setup" class="gs-toc-link" data-section="gs-setup">First-time setup</a>
+                                <a href="#gs-pipeline-step1" class="gs-toc-link" data-section="gs-pipeline-step1">Pipeline: Fetch Emails</a>
+                                <a href="#gs-pipeline-step2" class="gs-toc-link" data-section="gs-pipeline-step2">Pipeline: Select Emails</a>
+                                <a href="#gs-pipeline-step3" class="gs-toc-link" data-section="gs-pipeline-step3">Pipeline: Review Articles</a>
+                                <a href="#gs-dashboard" class="gs-toc-link" data-section="gs-dashboard">Dashboard</a>
+                                <a href="#gs-settings" class="gs-toc-link" data-section="gs-settings">Settings</a>
+                                <a href="#gs-logs" class="gs-toc-link" data-section="gs-logs">Logs Panel</a>
+                                <a href="#gs-responsive" class="gs-toc-link" data-section="gs-responsive">Responsive Design</a>
+                            </nav>
+
+                            <!-- CONTENT SECTIONS -->
+                            <div class="gs-content">
+
+                                <!-- OVERVIEW -->
+                                <div class="gs-accordion" id="gs-overview" data-keywords="overview app about pipeline dashboard settings gmail ai provider">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">What is this app?</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>Pruszkow News Pipeline connects to your Gmail inbox, fetches emails, sends them to an AI provider (Gemini, Claude, or OpenAI) to generate polished news articles, and creates Gmail drafts with the results. The entire workflow is a 3-step pipeline handled from a single page.</p>
+                                        <p>The app has three main pages, accessible from the sidebar:</p>
+                                        <ul>
+                                            <li><strong>Pipeline</strong> &mdash; The main workspace. Fetch emails, select them, generate articles, and create drafts.</li>
+                                            <li><strong>Dashboard</strong> &mdash; Usage statistics, quota tracking, and recent activity.</li>
+                                            <li><strong>Settings</strong> &mdash; Gmail connection, AI provider configuration, and article generation options.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- FIRST-TIME SETUP -->
+                                <div class="gs-accordion" id="gs-setup" data-keywords="setup first time credentials gmail connect ai provider api key oauth google cloud console gemini claude openai">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">First-time setup</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>Before using the pipeline, you need to complete three setup steps in the <strong>Settings</strong> page. Follow each step in order &mdash; each one depends on the previous.</p>
+
+                                        <!-- STEP A: Google Cloud Console & Credentials JSON -->
+                                        <div class="gs-step">
+                                            <div class="gs-step-num">A</div>
+                                            <div class="gs-step-content">
+                                                <h3>Get Google OAuth Credentials (client_secret.json)</h3>
+                                                <p>This file tells Google that your app is allowed to access Gmail on your behalf. You only need to do this once.</p>
+
+                                                <div class="gs-substep">
+                                                    <h4>A1. Go to Google Cloud Console</h4>
+                                                    <p>Open <strong><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a></strong> in your browser and sign in with your Google account.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A2. Create or select a project</h4>
+                                                    <p>At the top-left of the page, click the project dropdown (next to "Google Cloud"). Either select an existing project or click <strong>New Project</strong>, give it a name (e.g., "Pruszkow News Pipeline"), and click <strong>Create</strong>. Make sure the new project is selected in the dropdown.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A3. Enable the Gmail API</h4>
+                                                    <p>In the left sidebar, go to <strong>APIs &amp; Services &rarr; Library</strong>. Search for <strong>"Gmail API"</strong>, click on it, then click <strong>Enable</strong>. This grants your project permission to use Gmail's API.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A4. Configure the OAuth Consent Screen</h4>
+                                                    <p>Go to <strong>APIs &amp; Services &rarr; OAuth consent screen</strong>.</p>
+                                                    <ul>
+                                                        <li>Choose <strong>External</strong> user type (unless you have a Google Workspace account, in which case choose <strong>Internal</strong>). Click <strong>Create</strong>.</li>
+                                                        <li>Fill in the <strong>App name</strong> (e.g., "Pruszkow News Pipeline").</li>
+                                                        <li>Enter your <strong>User support email</strong> (your own email).</li>
+                                                        <li>Under <strong>Developer contact information</strong>, enter your email again.</li>
+                                                        <li>Click <strong>Save and Continue</strong>.</li>
+                                                        <li>On the <strong>Scopes</strong> page, click <strong>Add or Remove Scopes</strong>, search for <code>gmail.modify</code>, select it, click <strong>Update</strong>, then <strong>Save and Continue</strong>.</li>
+                                                        <li>On the <strong>Test users</strong> page, click <strong>Add Users</strong> and enter the Gmail address you want to use with the pipeline. Click <strong>Add</strong>, then <strong>Save and Continue</strong>.</li>
+                                                        <li>On the <strong>Summary</strong> page, click <strong>Back to Dashboard</strong>.</li>
+                                                    </ul>
+                                                    <p><strong>Note:</strong> While the app is in "Testing" mode, only test users can authorize it. You can add up to 100 test users.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A5. Create OAuth 2.0 Client ID</h4>
+                                                    <p>Go to <strong>APIs &amp; Services &rarr; Credentials</strong>.</p>
+                                                    <ul>
+                                                        <li>Click <strong>+ Create Credentials</strong> at the top, then select <strong>OAuth client ID</strong>.</li>
+                                                        <li>For <strong>Application type</strong>, select <strong>Desktop app</strong> (or "Other" if Desktop isn't shown).</li>
+                                                        <li>Give it a name (e.g., "Pruszkow Pipeline Desktop").</li>
+                                                        <li>Click <strong>Create</strong>.</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A6. Download the JSON file</h4>
+                                                    <p>After creating the client ID, a popup shows your Client ID and Client Secret. Close the popup. You'll now see your new client listed under <strong>OAuth 2.0 Client IDs</strong>.</p>
+                                                    <ul>
+                                                        <li>Click the <strong>download icon</strong> (down-arrow) next to your client name.</li>
+                                                        <li>A JSON file will be downloaded. It will be named something like <code>client_secret_XXXXX.apps.googleusercontent.com.json</code>.</li>
+                                                        <li><strong>Rename</strong> this file to <code>client_secret.json</code>.</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>A7. Upload to the app</h4>
+                                                    <p>Go to <strong>Settings &rarr; Google Credentials</strong> in the app. Click <strong>Choose JSON File</strong>, select the <code>client_secret.json</code> file you just downloaded, then click <strong>Upload &amp; Save</strong>. A green "Credentials file found" message confirms success.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP B: Connect Gmail -->
+                                        <div class="gs-step">
+                                            <div class="gs-step-num">B</div>
+                                            <div class="gs-step-content">
+                                                <h3>Connect Gmail</h3>
+                                                <p>In <strong>Settings &rarr; Gmail Connection</strong>, click <strong>Connect Gmail</strong>. This opens a Google OAuth consent screen in your browser.</p>
+                                                <ul>
+                                                    <li>Select the Gmail account you added as a test user in step A4.</li>
+                                                    <li>If you see "This app isn't verified", click <strong>Advanced</strong> &rarr; <strong>Go to [your app name] (unsafe)</strong>.</li>
+                                                    <li>Click <strong>Allow</strong> to grant the app access to read and modify your Gmail.</li>
+                                                    <li>You'll be redirected back to the app.</li>
+                                                </ul>
+                                                <p>After returning, the sidebar footer will show a <strong>green dot</strong> with "Gmail connected".</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- STEP C: AI Provider -->
+                                        <div class="gs-step">
+                                            <div class="gs-step-num">C</div>
+                                            <div class="gs-step-content">
+                                                <h3>Get an AI Provider API Key</h3>
+                                                <p>You need at least one API key for article generation. Choose one of the three providers below. You can add more later and switch between them.</p>
+
+                                                <div class="gs-substep">
+                                                    <h4>C1. Google Gemini (Recommended, Free Tier Available)</h4>
+                                                    <ul>
+                                                        <li>Go to <strong><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></strong>.</li>
+                                                        <li>Sign in with your Google account if prompted.</li>
+                                                        <li>Click <strong>Create API Key</strong>.</li>
+                                                        <li>Select a Google Cloud project (use the same one from step A2, or create a new one).</li>
+                                                        <li>Click <strong>Create API Key</strong>. Your key will be displayed.</li>
+                                                        <li><strong>Copy</strong> the key (it starts with <code>AI</code>).</li>
+                                                    </ul>
+                                                    <p>In the app, go to <strong>Settings &rarr; AI Provider</strong>. Select <strong>Google Gemini</strong>, paste your key into the input field, click <strong>Save</strong>, then <strong>Test</strong>. A green "Connected. Model: ..." message means it works.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>C2. Anthropic Claude</h4>
+                                                    <ul>
+                                                        <li>Go to <strong><a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a></strong>.</li>
+                                                        <li>Sign up or log in to your Anthropic account.</li>
+                                                        <li>Go to <strong>API Keys</strong> in the left sidebar.</li>
+                                                        <li>Click <strong>Create Key</strong>, give it a name (e.g., "Pruszkow Pipeline"), and click <strong>Create</strong>.</li>
+                                                        <li><strong>Copy</strong> the key immediately (it starts with <code>sk-ant-</code>). You won't be able to see it again.</li>
+                                                    </ul>
+                                                    <p>In the app, go to <strong>Settings &rarr; AI Provider</strong>. Select <strong>Anthropic Claude</strong>, paste your key, click <strong>Save</strong>, then <strong>Test</strong>.</p>
+                                                </div>
+
+                                                <div class="gs-substep">
+                                                    <h4>C3. OpenAI</h4>
+                                                    <ul>
+                                                        <li>Go to <strong><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a></strong>.</li>
+                                                        <li>Sign up or log in to your OpenAI account.</li>
+                                                        <li>Click <strong>Create new secret key</strong>.</li>
+                                                        <li>Give it a name (e.g., "Pruszkow Pipeline") and click <strong>Create secret key</strong>.</li>
+                                                        <li><strong>Copy</strong> the key immediately (it starts with <code>sk-</code>). You won't be able to see it again.</li>
+                                                        <li><strong>Note:</strong> OpenAI requires a paid account and billing setup. Check your usage at <a href="https://platform.openai.com/usage" target="_blank" rel="noopener">platform.openai.com/usage</a>.</li>
+                                                    </ul>
+                                                    <p>In the app, go to <strong>Settings &rarr; AI Provider</strong>. Select <strong>OpenAI</strong>, paste your key, click <strong>Save</strong>, then <strong>Test</strong>.</p>
+                                                </div>
+
+                                                <p>After testing, click <strong>Save Provider</strong> at the bottom to activate your chosen provider.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PIPELINE STEP 1 -->
+                                <div class="gs-accordion" id="gs-pipeline-step1" data-keywords="pipeline fetch emails max emails filter unread read mark as read listed label gmail inbox step 1">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Pipeline &mdash; Step 1: Fetch Emails</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>This is the first step of the workflow. It pulls emails from your connected Gmail inbox into the app.</p>
+
+                                        <div class="gs-control" data-keywords="max emails number input count how many">
+                                            <h4>Max emails</h4>
+                                            <p>A number input that controls how many emails to fetch in one go. Default is <strong>10</strong>. You can set it between 1 and 100. The app requests this many emails from Gmail, but may return fewer if your inbox has fewer unread messages matching the filter.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="filter dropdown all emails unread only read only">
+                                            <h4>Filter</h4>
+                                            <p>A dropdown that narrows which emails are fetched from Gmail:</p>
+                                            <ul>
+                                                <li><strong>All emails</strong> &mdash; Fetches every email in your inbox regardless of read status.</li>
+                                                <li><strong>Unread only</strong> &mdash; Only fetches emails you haven't opened yet. Useful for processing new incoming messages.</li>
+                                                <li><strong>Read only</strong> &mdash; Only fetches emails you have already read. Useful for processing older content.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="mark as read checkbox gmail inbox clean unread">
+                                            <h4>Mark as read</h4>
+                                            <p>A checkbox. When checked, every email that is fetched will be automatically marked as read in Gmail. This helps keep your inbox clean &mdash; after processing, fetched emails won't appear as unread anymore. If unchecked, emails remain in their current read/unread state.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="add listed label gmail label organize filter history">
+                                            <h4>Add "listed" label</h4>
+                                            <p>A checkbox. When checked, the app creates a Gmail label called "listed" and applies it to every fetched email. This lets you easily find in Gmail which emails have already been processed by the pipeline. You can later filter by this label in Gmail to see your history.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="fetch emails button start fetching progress log step 2 enabled">
+                                            <h4>Fetch Emails button</h4>
+                                            <p>Click this button to start fetching. The button text changes to "Fetching..." while the request is in progress. Once complete:</p>
+                                            <ul>
+                                                <li>The log panel (right side) shows how many emails were fetched and how many were new.</li>
+                                                <li>The email list appears in Step 2 below.</li>
+                                                <li>Step 2 becomes enabled (no longer grayed out).</li>
+                                            </ul>
+                                            <p>If the fetch fails (e.g., Gmail not connected), an error message appears in the log panel.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PIPELINE STEP 2 -->
+                                <div class="gs-accordion" id="gs-pipeline-step2" data-keywords="pipeline select emails email list preview select all generation mode batch sequential one by one generate articles">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Pipeline &mdash; Step 2: Select Emails</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>After fetching, this step shows all retrieved emails. You select which ones to send to the AI for article generation.</p>
+
+                                        <div class="gs-control" data-keywords="email list checkbox subject sender date">
+                                            <h4>Email list</h4>
+                                            <p>A list of all fetched emails. Each email shows:</p>
+                                            <ul>
+                                                <li>A <strong>checkbox</strong> &mdash; Check it to include the email in article generation.</li>
+                                                <li>The <strong>subject line</strong> (title).</li>
+                                                <li>The <strong>sender</strong> name/email.</li>
+                                                <li>The <strong>date</strong> the email was received.</li>
+                                            </ul>
+                                            <p>Click anywhere on an email row (except the checkbox) to open a preview.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="email preview body attachments subject sender date close">
+                                            <h4>Email preview</h4>
+                                            <p>Clicking an email opens a preview panel below the list showing:</p>
+                                            <ul>
+                                                <li>The full <strong>subject</strong>.</li>
+                                                <li>The <strong>sender</strong> and <strong>date</strong>.</li>
+                                                <li>The full email <strong>body</strong> text.</li>
+                                                <li>Any <strong>attachments</strong> (shown as filename tags).</li>
+                                            </ul>
+                                            <p>Click <strong>Close</strong> to dismiss the preview.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="select all checkbox toggle select deselect">
+                                            <h4>Select All</h4>
+                                            <p>A checkbox at the top of the list. When checked, it selects every email in the list at once. When unchecked, it clears all selections. Individual checkboxes can still be toggled independently.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="selected count badge number real time">
+                                            <h4>"X selected" badge</h4>
+                                            <p>Displays the current number of selected emails (e.g., "3 selected"). Updates in real time as you check/uncheck emails.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="generation mode toggle batch all in one sequential one by one radio button api call tokens quota">
+                                            <h4>Generation mode toggle</h4>
+                                            <p>Two radio buttons that control how the AI processes your selected emails:</p>
+                                            <ul>
+                                                <li><strong>All in one (Batch)</strong> &mdash; Sends all selected emails to the AI in a single API call. Uses fewer tokens and one system prompt. Faster and cheaper, but if the AI response fails, all articles are lost. Best for 2&ndash;5 similar emails.</li>
+                                                <li><strong>One by one (Sequential)</strong> &mdash; Processes each email individually in separate API calls. Each article is independent &mdash; one failure doesn't affect others. Results appear progressively. Uses more tokens (system prompt repeated per email). Best for many diverse emails.</li>
+                                            </ul>
+                                            <p>The <strong>&#9432;</strong> info icon next to the toggle opens a modal with a side-by-side comparison of both modes.</p>
+                                            <p><strong>Note:</strong> When only 1 email is selected, batch mode is automatically disabled and one-by-one is forced (batch is pointless for a single email).</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="generate articles button start generating progress step 3 enabled">
+                                            <h4>Generate Articles button</h4>
+                                            <p>Click to send the selected emails to the AI. The button is disabled until at least 1 email is selected. While generating:</p>
+                                            <ul>
+                                                <li>The button text changes to "Generating..."</li>
+                                                <li>Log entries appear in real time showing progress.</li>
+                                                <li>Step 3 becomes enabled.</li>
+                                            </ul>
+                                            <p>Once generation finishes, the articles appear in Step 3 for review.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PIPELINE STEP 3 -->
+                                <div class="gs-accordion" id="gs-pipeline-step3" data-keywords="pipeline review articles cards json view toggle headline body edit download create drafts gmail">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Pipeline &mdash; Step 3: Review Articles</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>The final step. AI-generated articles are displayed here for review, editing, and optional draft creation in Gmail.</p>
+
+                                        <div class="gs-control" data-keywords="articles count badge number total">
+                                            <h4>"X articles" badge</h4>
+                                            <p>Shows the total number of articles that were successfully generated.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="view toggle cards json switch display">
+                                            <h4>View toggle: Cards / JSON</h4>
+                                            <p>Two buttons that switch how articles are displayed:</p>
+                                            <ul>
+                                                <li><strong>Cards</strong> (default) &mdash; Each article is shown as an editable card with a headline input, a body textarea, metadata, and a download button.</li>
+                                                <li><strong>JSON</strong> &mdash; All articles are shown as raw JSON. Useful for debugging or copy-pasting structured data.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="article card checkbox headline body textarea edit filename download">
+                                            <h4>Article card (Cards view)</h4>
+                                            <p>Each generated article appears as a card containing:</p>
+                                            <ul>
+                                                <li><strong>Checkbox</strong> &mdash; Select/unselect this article for draft creation.</li>
+                                                <li><strong>Headline input</strong> &mdash; The AI-generated headline. You can edit it directly by clicking and typing. Changes are saved locally.</li>
+                                                <li><strong>Body textarea</strong> &mdash; The full AI-generated article text. Editable &mdash; click and modify the content before creating drafts.</li>
+                                                <li><strong>Filename</strong> &mdash; The suggested filename shown in the footer.</li>
+                                                <li><strong>Download button</strong> &mdash; Click to download the article as a file.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="select all articles checkbox toggle">
+                                            <h4>Select All (articles)</h4>
+                                            <p>A checkbox that selects or deselects all articles at once. Toggling it clears individual selections and re-selects all (or none).</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="create drafts button gmail draft email count">
+                                            <h4>Create Drafts button</h4>
+                                            <p>Creates Gmail draft emails from the selected articles. The button text shows the count, e.g., "Create Drafts (3)". Disabled when no articles are selected.</p>
+                                            <p>Each selected article becomes a separate Gmail draft. The draft contains the article headline as the subject and the article body as the email body. Results appear in the log panel: green for successful drafts, red for failures.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- DASHBOARD -->
+                                <div class="gs-accordion" id="gs-dashboard" data-keywords="dashboard usage statistics requests tokens latency quota progress bars provider activity table limits reset">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Dashboard</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>The Dashboard tracks your API usage across all pipeline runs. It loads automatically when you navigate to this page.</p>
+
+                                        <div class="gs-control" data-keywords="summary cards requests today week month total">
+                                            <h4>Summary cards (top row)</h4>
+                                            <p>Four cards showing total API <strong>request counts</strong>:</p>
+                                            <ul>
+                                                <li><strong>Today</strong> &mdash; Requests made today (resets at midnight).</li>
+                                                <li><strong>This Week</strong> &mdash; Requests made this week.</li>
+                                                <li><strong>This Month</strong> &mdash; Requests made this calendar month.</li>
+                                                <li><strong>Total</strong> &mdash; All-time total requests since usage tracking began.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="token usage cards tokens today week month average latency milliseconds">
+                                            <h4>Token usage cards (second row)</h4>
+                                            <p>Four cards showing token consumption:</p>
+                                            <ul>
+                                                <li><strong>Today Tokens</strong> &mdash; Tokens used today.</li>
+                                                <li><strong>Week Tokens</strong> &mdash; Tokens used this week.</li>
+                                                <li><strong>Month Tokens</strong> &mdash; Tokens used this month.</li>
+                                                <li><strong>Avg Latency</strong> &mdash; Average response time per API request in milliseconds.</li>
+                                            </ul>
+                                            <p>Tokens are displayed with abbreviations: "k" for thousands (e.g., 12.5k), "M" for millions.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="quota usage bars progress daily weekly monthly purple yellow red warning over limit">
+                                            <h4>Quota Usage bars</h4>
+                                            <p>Six progress bars showing current usage against your configured limits:</p>
+                                            <ul>
+                                                <li>Daily Requests, Weekly Requests, Monthly Requests</li>
+                                                <li>Daily Tokens, Weekly Tokens, Monthly Tokens</li>
+                                            </ul>
+                                            <p>Each bar shows "current / limit" (e.g., "45 / 100"). If no limit is set, it shows "current / unlimited" with an empty bar. Bar colors:</p>
+                                            <ul>
+                                                <li><strong>Purple</strong> &mdash; Under 80% of limit.</li>
+                                                <li><strong>Yellow</strong> &mdash; 80% or more of limit (warning).</li>
+                                                <li><strong>Red</strong> &mdash; 100% or more of limit (over).</li>
+                                            </ul>
+                                            <p>Reset timers show when each quota period resets (e.g., "resets in 14h 32m").</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="requests by status successful failed green red dot">
+                                            <h4>Requests by Status</h4>
+                                            <p>Two rows showing:</p>
+                                            <ul>
+                                                <li><strong>Successful</strong> (green dot) &mdash; Total API calls that returned a valid response.</li>
+                                                <li><strong>Failed</strong> (red dot) &mdash; Total API calls that errored out.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="by provider gemini claude openai active badge stats requests tokens">
+                                            <h4>By Provider</h4>
+                                            <p>Lists each AI provider you've used (Gemini, Claude, OpenAI) with stats:</p>
+                                            <ul>
+                                                <li>Number of requests made to that provider.</li>
+                                                <li>Total tokens consumed.</li>
+                                                <li>Number of failed requests.</li>
+                                                <li>An "ACTIVE" badge on the currently selected provider.</li>
+                                            </ul>
+                                            <p>If no API calls have been made yet, shows "No API calls yet."</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="recent activity table last 50 requests time provider operation tokens latency status ok fail">
+                                            <h4>Recent Activity table</h4>
+                                            <p>A table of the last 50 API requests, showing:</p>
+                                            <ul>
+                                                <li><strong>Time</strong> &mdash; When the request was made (e.g., "Aug 27, 14:32").</li>
+                                                <li><strong>Provider</strong> &mdash; Which AI service was used.</li>
+                                                <li><strong>Operation</strong> &mdash; What was done (e.g., "generate").</li>
+                                                <li><strong>Tokens</strong> &mdash; Total tokens for that request.</li>
+                                                <li><strong>Latency</strong> &mdash; How long the request took (e.g., "2340ms").</li>
+                                                <li><strong>Status</strong> &mdash; "OK" (green) or "FAIL" (red).</li>
+                                            </ul>
+                                            <p>Most recent entries appear at the bottom. The table scrolls horizontally on narrow screens.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="quota limits form save limits reset all usage unlimited daily weekly monthly requests tokens">
+                                            <h4>Quota Limits form</h4>
+                                            <p>Set soft limits for your own reference. These do <strong>not</strong> block API calls &mdash; they only affect the progress bars above. Set to <strong>0</strong> for unlimited.</p>
+                                            <ul>
+                                                <li>Daily Requests, Weekly Requests, Monthly Requests</li>
+                                                <li>Daily Tokens, Weekly Tokens, Monthly Tokens</li>
+                                            </ul>
+                                            <p>Click <strong>Save Limits</strong> to apply. Click <strong>Reset All Usage</strong> to wipe all usage data (requires confirmation &mdash; this cannot be undone).</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SETTINGS -->
+                                <div class="gs-accordion" id="gs-settings" data-keywords="settings gmail connection google credentials ai provider api key ignored senders system prompt article settings language min words max words">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Settings</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>Configure everything the pipeline needs to operate. Organized in two columns.</p>
+
+                                        <h3 class="gs-col-heading">Left column</h3>
+
+                                        <div class="gs-control" data-keywords="gmail connection connect oauth authorize status dot green">
+                                            <h4>Gmail Connection</h4>
+                                            <p>Shows whether your Gmail account is connected. Click <strong>Connect Gmail</strong> to start the OAuth flow. After authorizing, the status updates to "Connected to Gmail" (green). The sidebar footer dot also turns green.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="google credentials upload json file oauth 2.0 cloud console client secret download">
+                                            <h4>Google Credentials</h4>
+                                            <p>Upload the OAuth 2.0 JSON file from Google Cloud Console. This is the file you downloaded in the First-time setup guide (step A6).</p>
+                                            <ul>
+                                                <li>Click <strong>Choose JSON File</strong> to select the <code>client_secret.json</code> file.</li>
+                                                <li>Click <strong>Upload &amp; Save</strong>.</li>
+                                                <li>Status shows "Credentials file found" (green) or "No credentials file found" (red).</li>
+                                            </ul>
+                                            <p>The file must be a valid Google OAuth 2.0 client secret JSON. It contains your Client ID, Client Secret, and redirect URIs. This file is stored locally and never leaves your machine.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="ai provider gemini claude openai radio button api key save test model free tier">
+                                            <h4>AI Provider</h4>
+                                            <p>Three providers are listed as radio buttons. Each has its own key input, save button, and test button:</p>
+                                            <ul>
+                                                <li><strong>Google Gemini</strong> &mdash; Free tier available. Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Key starts with <code>AI</code>.</li>
+                                                <li><strong>Anthropic Claude</strong> &mdash; Paid. Get your key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>. Key starts with <code>sk-ant-</code>.</li>
+                                                <li><strong>OpenAI</strong> &mdash; Paid. Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>. Key starts with <code>sk-</code>. Requires billing setup.</li>
+                                            </ul>
+                                            <p>For each provider: paste your API key, click <strong>Save</strong> to store it, then click <strong>Test</strong> to verify. Success shows "Connected. Model: ..." (green). Failure shows the error message (red).</p>
+                                            <p>After saving a key, click <strong>Save Provider</strong> at the bottom to set which provider is active. Only one provider can be active at a time. You can configure multiple providers and switch between them.</p>
+                                        </div>
+
+                                        <h3 class="gs-col-heading">Right column</h3>
+
+                                        <div class="gs-control" data-keywords="ignored senders block hide filter email domain substring match add remove">
+                                            <h4>Ignored Senders</h4>
+                                            <p>Emails from these senders are hidden from the pipeline (not fetched). Uses substring matching:</p>
+                                            <ul>
+                                                <li>Type an email address or domain (e.g., "linkedin.com") and click <strong>Add</strong>.</li>
+                                                <li>"linkedin.com" will block all emails containing "linkedin.com" in the sender field (e.g., noreply@linkedin.com, jobs@linkedin.com).</li>
+                                                <li>Press Enter in the input field as a shortcut for Add.</li>
+                                                <li>Click the <strong>&times;</strong> button next to any entry to remove it from the ignore list.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="system prompt instructions tone language format rules ai textarea">
+                                            <h4>System Prompt</h4>
+                                            <p>The instructions sent to the AI for every article generation. Controls the tone, language, format, and rules the AI follows. The textarea is pre-filled with the current prompt. Edit it and click <strong>Save Prompt</strong>. The prompt cannot be empty.</p>
+                                        </div>
+
+                                        <div class="gs-control" data-keywords="article settings min words max words language polish english auto default generation mode batch one by one">
+                                            <h4>Article Settings</h4>
+                                            <p>Fine-tune article generation parameters:</p>
+                                            <ul>
+                                                <li><strong>Min words</strong> &mdash; Minimum word count for generated articles (default: 50). Shorter emails may produce fewer words.</li>
+                                                <li><strong>Max words</strong> &mdash; Maximum word count, enforced by the AI prompt (default: 200).</li>
+                                                <li><strong>Article language</strong> &mdash; Choose <strong>Polish</strong>, <strong>English</strong>, or <strong>Auto</strong> (based on the email's language).</li>
+                                                <li><strong>Default generation mode</strong> &mdash; Sets which mode (batch or one-by-one) is pre-selected in the Pipeline page.</li>
+                                            </ul>
+                                            <p>Click <strong>Save Settings</strong> to apply. Min words cannot exceed max words.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- LOGS PANEL -->
+                                <div class="gs-accordion" id="gs-logs" data-keywords="logs panel log messages gray green red yellow info success error progress clear">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Logs panel</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>Always visible on the right side of every page. Shows real-time log messages as you use the app:</p>
+                                        <ul>
+                                            <li><strong>Gray</strong> &mdash; Informational messages.</li>
+                                            <li><strong>Green</strong> &mdash; Success messages (e.g., "Fetched 5 emails", "Draft created").</li>
+                                            <li><strong>Red</strong> &mdash; Error messages (e.g., "Fetch failed", "Auth error").</li>
+                                            <li><strong>Yellow</strong> &mdash; Progress messages (e.g., "Generating 3 article(s)...").</li>
+                                        </ul>
+                                        <p>Click <strong>Clear</strong> to remove all log entries.</p>
+                                    </div>
+                                </div>
+
+                                <!-- RESPONSIVE -->
+                                <div class="gs-accordion" id="gs-responsive" data-keywords="responsive design mobile sidebar collapse icons gear menu wrench question mark 900px 1200px layout">
+                                    <button class="gs-accordion-header" aria-expanded="true">
+                                        <span class="gs-accordion-arrow">&#9660;</span>
+                                        <span class="gs-accordion-title">Responsive design</span>
+                                    </button>
+                                    <div class="gs-accordion-body">
+                                        <p>On screens narrower than 900px, the sidebar collapses to a thin 52px strip. Text labels are replaced with icons:</p>
+                                        <ul>
+                                            <li><strong>Pipeline</strong> &mdash; Gear icon (&#9881;)</li>
+                                            <li><strong>Dashboard</strong> &mdash; Menu icon (&#9776;)</li>
+                                            <li><strong>Settings</strong> &mdash; Wrench icon (&#9874;)</li>
+                                            <li><strong>First time here?</strong> &mdash; Question mark icon (&#10067;)</li>
+                                        </ul>
+                                        <p>On screens narrower than 1200px, the Settings page switches from a 2-column to a 1-column layout, and the Dashboard grid adjusts to fewer columns.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- LOGS PANEL - always visible on the right -->
+            <div class="logs-panel" id="logs-panel">
+                <div class="logs-header">
+                    <h3>Logs</h3>
+                    <button class="btn btn-small btn-secondary" id="btn-clear-logs">Clear</button>
+                </div>
+                <div class="logs-body" id="logs-body">
+                    <div class="log-entry log-info">Pipeline ready. Fetch emails to begin.</div>
+                </div>
+            </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modal-mode-info" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Generation Mode</h3>
+                <button class="btn-close-modal" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="comparison">
+                    <div class="comparison-col">
+                        <h4>All in one (Batch)</h4>
+                        <ul>
+                            <li class="pro">Uses 1 API call regardless of email count</li>
+                            <li class="pro">System prompt sent only once</li>
+                            <li class="pro">Lower token usage overall</li>
+                            <li class="pro">Best for staying within quota limits</li>
+                            <li class="con">If AI response fails or is malformed, all articles are lost</li>
+                            <li class="con">AI may occasionally mix up content between emails</li>
+                            <li class="con">Longer wait before seeing any results</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col">
+                        <h4>One by one (Sequential)</h4>
+                        <ul>
+                            <li class="pro">Each article is independent &mdash; one failure doesn't affect others</li>
+                            <li class="pro">Results appear progressively as each finishes</li>
+                            <li class="pro">More reliable for mixed content types</li>
+                            <li class="con">Uses N API calls for N emails</li>
+                            <li class="con">System prompt repeated for every email</li>
+                            <li class="con">Consumes quota faster</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-tip">
+                    <strong>Tip:</strong> For 2&ndash;5 similar emails, batch mode saves the most quota. For many diverse emails, one-by-one is safer.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
