@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 
 from google import genai
 from google.genai import types
@@ -27,7 +28,7 @@ class GeminiService:
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> dict:
         client = self._get_client()
 

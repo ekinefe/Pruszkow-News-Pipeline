@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
@@ -183,10 +184,10 @@ def set_system_rules(req: SystemRulesRequest):
 # --- Article Settings ---
 
 class ArticleSettingsRequest(BaseModel):
-    min_words: int | None = None
-    max_words: int | None = None
-    language: str | None = None
-    default_mode: str | None = None
+    min_words: Optional[int] = None
+    max_words: Optional[int] = None
+    language: Optional[str] = None
+    default_mode: Optional[str] = None
 
 
 @router.get("/settings/article-settings")
@@ -226,12 +227,12 @@ def get_usage_summary(provider: str = ""):
 
 
 class QuotaRequest(BaseModel):
-    daily_requests: int | None = None
-    weekly_requests: int | None = None
-    monthly_requests: int | None = None
-    daily_tokens: int | None = None
-    weekly_tokens: int | None = None
-    monthly_tokens: int | None = None
+    daily_requests: Optional[int] = None
+    weekly_requests: Optional[int] = None
+    monthly_requests: Optional[int] = None
+    daily_tokens: Optional[int] = None
+    weekly_tokens: Optional[int] = None
+    monthly_tokens: Optional[int] = None
 
 
 @router.get("/usage/quota")
