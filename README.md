@@ -42,7 +42,7 @@ Before you begin, make sure you have:
 
 | Requirement | How to Get It |
 |-------------|---------------|
-| **Python 3.10 or newer** | Download from [python.org](https://www.python.org/downloads/) |
+| **Python 3.9 or newer** | Download from [python.org](https://www.python.org/downloads/) — the starter script offers to install it for you on macOS if you have Homebrew |
 | **A Google account** | For Gmail access |
 | **An AI API key** | Free from [Google AI Studio](https://aistudio.google.com/apikey) (recommended) |
 
@@ -134,7 +134,8 @@ chmod +x start.sh
 The script will automatically:
 1. **Check if Python 3 is installed**
    - ✅ If yes → continues to next step
-   - ❌ If no → shows error message and stops. You must [install Python](https://www.python.org/downloads/) first, then run `./start.sh` again
+   - 🍺 If no, and you have Homebrew → offers to run `brew install python@3.12` for you (press Enter to accept)
+   - ❌ If no, and no Homebrew → shows a direct download link ([python.org/downloads/macos](https://www.python.org/downloads/macos/)) and stops. Run the `.pkg` installer, then run `./start.sh` again
 2. Create a settings file (`.env`) ✓
 3. Ask you to choose an AI provider (type `1` for Gemini — it's free) ✓
 4. Ask for your API key (paste it in) ✓
@@ -173,7 +174,7 @@ chmod +x start.sh
 The script will automatically:
 1. **Check if Python 3 is installed**
    - ✅ If yes → continues to next step
-   - ❌ If no → shows error message and stops. You must [install Python](https://www.python.org/downloads/) first, then run `./start.sh` again
+   - ❌ If no → prints the install command for your distro (e.g. `sudo apt install python3 python3-venv`) and stops. Run it, then run `./start.sh` again
 2. Create a settings file (`.env`) ✓
 3. Ask you to choose an AI provider (type `1` for Gemini — it's free) ✓
 4. Ask for your API key (paste it in) ✓
@@ -193,7 +194,7 @@ The script will automatically:
 
 | Step | What Happens |
 |------|--------------|
-| 1 | **Checks if Python 3 is installed** — if not, shows error and stops |
+| 1 | **Checks if Python 3.9+ is installed** — on macOS without Python, offers to install it via Homebrew; otherwise shows install instructions and stops |
 | 2 | Creates `.env` file from `.env.example` if it doesn't exist |
 | 3 | Asks you to choose an AI provider (Gemini, Claude, or OpenAI) |
 | 4 | Asks for your API key and saves it |
@@ -307,17 +308,18 @@ pruszkow-news-pipeline/
 
 ## Troubleshooting
 
-### "Python not found" or "python3 not found" error
+### "Python not found" error
 
-This means Python is not installed on your computer.
+This means Python is not installed on your computer (or is older than 3.9).
 
 **What you'll see:**
 - Windows: `[ERROR] Python not found. Install Python 3.10+ first.` (then the window closes)
-- Mac/Linux: `[ERROR] python3 not found. Install Python 3.10+ first.`
+- Mac: `[ERROR] Python was not found on this computer.` — if you have Homebrew, the script offers to install it for you right there (press Enter to accept); otherwise it prints a direct download link
+- Linux: prints the install command for your distro (e.g. `sudo apt install python3 python3-venv`)
 
-**How to fix:**
+**How to fix (if the script couldn't install it for you):**
 1. Go to [python.org/downloads](https://www.python.org/downloads/)
-2. Download Python 3.10 or newer
+2. Download Python 3.9 or newer
 3. Run the installer
 4. **IMPORTANT (Windows only):** During installation, check the box that says **"Add Python to PATH"** — this is near the bottom of the first installer screen
 5. After installation, run the starter script again (`start.bat` or `./start.sh`)

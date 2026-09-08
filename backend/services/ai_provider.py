@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import json
 import re
 import time
+from typing import Optional
 
 from backend.config import settings
 
@@ -58,7 +59,7 @@ class AIProvider(ABC):
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> dict:
         pass
 
@@ -78,7 +79,7 @@ class AIProvider(ABC):
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> str:
         attachment_str = ", ".join(attachments) if attachments else "None"
         return (
@@ -168,7 +169,7 @@ class GeminiProvider(AIProvider):
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> dict:
         from google.genai import types
         from backend.services.usage import usage_service
@@ -292,7 +293,7 @@ class ClaudeProvider(AIProvider):
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> dict:
         from backend.services.usage import usage_service
 
@@ -415,7 +416,7 @@ class OpenAIProvider(AIProvider):
         title: str,
         sender: str,
         body: str,
-        attachments: list[str] | None = None,
+        attachments: Optional[list[str]] = None,
     ) -> dict:
         from backend.services.usage import usage_service
 
@@ -524,7 +525,7 @@ providers = {
 }
 
 
-def get_provider(name: str | None = None) -> AIProvider:
+def get_provider(name: Optional[str] = None) -> AIProvider:
     provider_name = name or settings.ai_provider
     cls = providers.get(provider_name)
     if not cls:

@@ -20,10 +20,47 @@ echo ""
 
 # --- Check Python ---
 if ! command -v python3 &> /dev/null; then
-    echo "[ERROR] python3 not found. Install Python 3.10+ first."
+    echo "[ERROR] Python was not found on this computer."
+    echo ""
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v brew &> /dev/null; then
+            read -p "Install Python now with Homebrew? [Y/n]: " INSTALL_PY
+            INSTALL_PY=${INSTALL_PY:-Y}
+            if [[ "$INSTALL_PY" =~ ^[Yy] ]]; then
+                brew install python@3.12
+            else
+                echo "Download Python from: https://www.python.org/downloads/macos/"
+                exit 1
+            fi
+        else
+            echo "       Easiest option: download the installer from"
+            echo "       https://www.python.org/downloads/macos/"
+            echo "       (Run the .pkg installer, then re-run this script.)"
+            echo ""
+            echo "       If you have Homebrew, you can instead run: brew install python@3.12"
+            exit 1
+        fi
+    else
+        echo "       Install it with your package manager, e.g.:"
+        echo "         Ubuntu/Debian: sudo apt install python3 python3-venv"
+        echo "         Fedora:        sudo dnf install python3"
+        echo "       Or download from: https://www.python.org/downloads/"
+        exit 1
+    fi
+fi
+
+if ! command -v python3 &> /dev/null; then
+    echo "[ERROR] Python installation did not complete. Please install it manually and re-run this script."
     exit 1
 fi
+
 PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+PYTHON_OK=$(python3 -c "import sys; print(1 if sys.version_info >= (3, 9) else 0)")
+if [ "$PYTHON_OK" != "1" ]; then
+    echo "[ERROR] Python $PYTHON_VERSION found, but 3.9+ is required."
+    echo "        Download a newer version: https://www.python.org/downloads/"
+    exit 1
+fi
 echo "[OK] Python $PYTHON_VERSION"
 
 # --- Create .env from example if missing ---

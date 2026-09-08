@@ -2,6 +2,7 @@ import os
 import base64
 import json
 from pathlib import Path
+from typing import Optional
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -38,7 +39,7 @@ class GmailService:
         except Exception:
             return False
 
-    def get_user_email(self) -> str | None:
+    def get_user_email(self) -> Optional[str]:
         try:
             if not self.is_authenticated():
                 return None
@@ -289,7 +290,7 @@ class GmailService:
 
         return attachments_list
 
-    def _get_or_create_label(self, service, label_name: str = "listed") -> str | None:
+    def _get_or_create_label(self, service, label_name: str = "listed") -> Optional[str]:
         try:
             results = service.users().labels().list(userId="me").execute()
             labels = results.get("labels", [])

@@ -1,6 +1,7 @@
 import json
 import csv
 from pathlib import Path
+from typing import Optional
 
 from backend.config import settings
 
@@ -34,7 +35,7 @@ class DatabaseService:
             writer.writeheader()
             writer.writerows(emails)
 
-    def get_email_by_id(self, email_id: str) -> dict | None:
+    def get_email_by_id(self, email_id: str) -> Optional[dict]:
         emails = self.load_emails()
         for e in emails:
             if e["id"] == email_id:
@@ -73,7 +74,7 @@ class DatabaseService:
 
         return articles
 
-    def get_article(self, article_id: str) -> dict | None:
+    def get_article(self, article_id: str) -> Optional[dict]:
         file_path = settings.articles_dir / f"{article_id}.txt"
         if not file_path.exists():
             return None
@@ -117,7 +118,7 @@ class DatabaseService:
             "filename": filename,
         }
 
-    def update_article(self, article_id: str, headline: str | None = None, body: str | None = None) -> dict | None:
+    def update_article(self, article_id: str, headline: Optional[str] = None, body: Optional[str] = None) -> Optional[dict]:
         article = self.get_article(article_id)
         if not article:
             return None

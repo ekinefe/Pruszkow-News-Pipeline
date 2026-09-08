@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -26,8 +28,8 @@ class ArticleRecord(BaseModel):
 
 
 class ArticleUpdate(BaseModel):
-    headline: str | None = None
-    body: str | None = None
+    headline: Optional[str] = None
+    body: Optional[str] = None
 
 
 class GenerateRequest(BaseModel):
